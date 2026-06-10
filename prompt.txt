@@ -1,0 +1,51 @@
+======================================================================
+PROJECT: 3-Year BTech Engineering Portfolio & Full-Stack Academic Tracker
+DATABASE: Zero-Configuration Local JSON File System (data/db.json)
+BACKEND: Node.js + Express + Multer (For file uploads)
+FRONTEND: Semantic HTML5 + CSS3 + Dynamic Vanilla JavaScript (Fetch API)
+======================================================================
+
+I need to build a dynamic, full-stack, zero-maintenance personal portfolio website that I can use and update easily across my entire 3-year BTech engineering journey. 
+
+I do not want a static website where I have to manually edit HTML/CSS code every time I achieve something new. Instead, I need a local web-based Admin Dashboard where I can fill out forms, upload files, and manage my data entirely from the browser. All changes must instantly save to a local text-based JSON file database (`data/db.json`), and the public frontend must update automatically on page refresh.
+
+Please generate the complete, fully functional architecture using the specifications below:
+
+---
+
+### 1. CORE BACKEND ARCHITECTURE (Node.js & Express)
+- Setup a standard `server.js` file using Express.
+- Implement `multer` middleware to handle file uploads safely.
+- All physical files (Project images, Certificate PDFs, etc.) must be saved inside a `public/uploads/` directory.
+- The server must read from and write to a single local text file database located at `data/db.json`. 
+- When a file is uploaded, the server should save the file locally and write its string web path (e.g., `/uploads/filename.jpg`) into the JSON database array.
+
+---
+
+### 2. DATABASE SCHEMA (data/db.json)
+The JSON structure must support arrays for the following data collections:
+- `projects`: id, title, description, technologies (comma-separated), githubLink, imagePath.
+- `certificates`: id, name, issuingOrganization, date, credentialUrl, pdfPath.
+- `experience`: id, role, organization, duration, description.
+- `socials`: linkedin, github, leetcode, email, portfolio.
+- `academics`: An array or map tracking Semester 1 through Semester 8, storing fields for SGPA and cumulative CGPA for each semester.
+
+---
+
+### 3. FRONTEND UI & FEATURES (public/index.html & js)
+Create a clean, modern, fully responsive engineering portfolio interface containing the following sections/tabs:
+- **Home / Hero Section:** Introduction text and dynamic contact/social media links.
+- **Projects:** A grid system rendering project cards dynamically using `fetch()`.
+- **Certificates & Experience:** Timelines or grids displaying milestones and verified PDF certificates.
+- **Academics Tracker:** A clean, dedicated table showing all 8 semesters of BTech, tracking SGPA/CGPA progression dynamically over 3 years.
+
+---
+
+### 4. ADMIN DASHBOARD & CRUD MANAGEMENT
+I need a secure or dedicated interface (`/admin` or a toggleable dashboard section) that provides full CRUD (Create, Read, Update, Delete) controls:
+- **Create:** Forms to upload new projects, certificates, experiences, and set up initial social links/CGPAs.
+- **Read:** Display all current items in lists inside the dashboard so I can see what is currently live.
+- **Update (EDIT Mode):** Every item must have an "Edit" button. Clicking it must populate the input fields with that item's existing data. I must be able to change text or replace the uploaded image/PDF file, and hit "Save" to send a PUT/PATCH request to the server to update `db.json`.
+- **Delete:** Every item must have a "Delete" button that immediately removes the record from `db.json` via a DELETE request.
+
+Please provide the modular, complete code for `server.js`, a starting empty structure for `data/db.json`, and the frontend code (`index.html`, styling, and `app.js`). Ensure error handling is clean so file uploads don't crash the server.
