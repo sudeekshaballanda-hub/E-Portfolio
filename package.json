@@ -1,0 +1,17 @@
+{
+  "name": "engineering-portfolio",
+  "version": "1.0.0",
+  "description": "Full-stack dynamic portfolio for engineering students",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "multer": "^1.4.5-lts.1"
+  }
+}
