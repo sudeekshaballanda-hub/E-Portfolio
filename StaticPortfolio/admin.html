@@ -1,0 +1,1969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Portfolio Control Panel</title>
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #3b82f6; /* Electric Blue */
+      --primary-dark: #1e40af; /* Deep Navy */
+      --accent: #10b981; /* Emerald Green */
+      --danger: #ef4444; /* Red for delete/errors */
+      --bg-main: #0b0f19; /* Background */
+      --bg-panel: #131c31; /* Dashboard Cards */
+      --bg-input: #070a11;
+      --border-color: rgba(59, 130, 246, 0.15);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-body: 'Outfit', sans-serif;
+      --transition: all 0.25s ease-in-out;
+      --glow-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-main);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-panel);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+
+    /* Login Screen Container */
+    #login-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .login-card {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      padding: 40px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    .login-card h2 {
+      font-family: var(--font-display);
+      margin-bottom: 15px;
+      font-size: 1.75rem;
+    }
+
+    .login-card p {
+      color: var(--text-muted);
+      margin-bottom: 25px;
+      font-size: 0.95rem;
+    }
+
+    .login-error {
+      background-color: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--danger);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    /* Main Dashboard Layout */
+    #dashboard-screen {
+      display: none; /* Hidden until authenticated */
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    aside {
+      background-color: var(--bg-panel);
+      border-right: 1px solid var(--border-color);
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    .aside-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 35px;
+      padding-left: 10px;
+    }
+
+    .aside-header i {
+      color: var(--primary);
+    }
+
+    .menu-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-grow: 1;
+    }
+
+    .menu-item button {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px 15px;
+      text-align: left;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: var(--transition);
+    }
+
+    .menu-item button:hover {
+      background-color: rgba(59, 130, 246, 0.05);
+      color: var(--text-main);
+    }
+
+    .menu-item.active button {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: var(--glow-shadow);
+    }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--border-color);
+      color: var(--danger);
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition);
+      margin-top: 20px;
+    }
+
+    .btn-logout:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+      border-color: var(--danger);
+    }
+
+    /* Main Area */
+    main {
+      padding: 40px;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 20px;
+    }
+
+    .main-header h1 {
+      font-family: var(--font-display);
+      font-size: 1.85rem;
+    }
+
+    .btn-view-site {
+      text-decoration: none;
+      background-color: rgba(59, 130, 246, 0.1);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .btn-view-site:hover {
+      background-color: var(--primary);
+      color: white;
+      box-shadow: var(--glow-shadow);
+    }
+
+    /* Alert Banners */
+    .alert {
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      display: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .alert-danger {
+      background-color: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    /* Form Fields and Inputs */
+    .form-panel {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+
+    .form-panel h3 {
+      font-family: var(--font-display);
+      margin-bottom: 20px;
+      font-size: 1.35rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .form-grid.full {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group.span-2 {
+      grid-column: span 2;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .form-control {
+      width: 100%;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      outline: none;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: var(--glow-shadow);
+    }
+
+    textarea.form-control {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* Buttons */
+    .btn-submit {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .btn-submit:hover {
+      background-color: var(--primary-dark);
+      box-shadow: var(--glow-shadow);
+    }
+
+    .btn-action-edit {
+      background-color: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-action-edit:hover {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    /* Tab Contents Switching */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Manage Row Items Layout */
+    .manage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .manage-item {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: var(--transition);
+    }
+
+    .manage-item:hover {
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .manage-info h4 {
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .manage-info p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .action-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-delete {
+      background: none;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-delete:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+      border-color: var(--danger);
+    }
+
+    /* Grid for Projects images preview */
+    .proj-item-with-img {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .proj-thumbnail {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-panel);
+    }
+
+    /* Messages viewer layouts */
+    .message-card {
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .message-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .message-meta span.date {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .message-card h4 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .message-card p.body {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .message-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 10px;
+    }
+
+    /* File upload visual states */
+    .file-input-wrapper {
+      position: relative;
+      background-color: var(--bg-input);
+      border: 1px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .file-input-wrapper:hover {
+      border-color: var(--primary);
+      background-color: rgba(59, 130, 246, 0.02);
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-input-wrapper i {
+      font-size: 2rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .file-input-name {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Modals for Editing and Reading */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(7, 10, 17, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      animation: modalOpen 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalOpen {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .modal-header {
+      padding: 25px 30px 15px;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      background-color: var(--bg-panel);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      color: var(--text-main);
+    }
+
+    .modal-title h2 {
+      font-size: 1.5rem;
+      color: var(--text-main);
+    }
+
+    .modal-body {
+      padding: 25px 30px 30px;
+    }
+
+    /* Academics editor custom list items */
+    .sem-item-row {
+      display: grid;
+      grid-template-columns: 100px 80px 80px 1fr auto;
+      gap: 15px;
+      background-color: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 18px;
+      align-items: center;
+    }
+
+    .sem-item-row span.label {
+      font-weight: 600;
+    }
+
+    .sem-item-row span.gpa {
+      font-family: var(--font-display);
+      font-weight: 600;
+    }
+
+    .sem-item-row span.courses {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      #dashboard-screen {
+        grid-template-columns: 1fr;
+      }
+
+      aside {
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+        padding: 20px;
+      }
+
+      .menu-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+
+      .menu-item button {
+        white-space: nowrap;
+        padding: 10px 15px;
+      }
+
+      .btn-logout {
+        margin-top: 0;
+        align-self: center;
+      }
+
+      main {
+        padding: 20px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-group.span-2 {
+        grid-column: span 1;
+      }
+
+      .sem-item-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .sem-item-row span.courses {
+        grid-column: span 2;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN PANEL -->
+  <div id="login-screen">
+    <div class="login-card">
+      <h2>Portfolio Manager</h2>
+      <p>Enter administrative credentials to proceed.</p>
+      <div class="login-error" id="login-error-banner">Invalid Admin Password</div>
+      <form id="login-form">
+        <div class="form-group" style="text-align: left;">
+          <label for="admin-password">Dashboard Password</label>
+          <input type="password" id="admin-password" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-submit" style="width: 100%; justify-content: center;">
+          Log In <i class="fa-solid fa-right-to-bracket"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN DASHBOARD SCREEN -->
+  <div id="dashboard-screen">
+    <!-- Sidebar -->
+    <aside>
+      <div class="aside-header">
+        <i class="fa-solid fa-sliders"></i> Control Center
+      </div>
+      <ul class="menu-list">
+        <li class="menu-item active" data-tab="profile"><button><i class="fa-solid fa-address-card"></i> Profile & Resume</button></li>
+        <li class="menu-item" data-tab="socials"><button><i class="fa-solid fa-share-nodes"></i> Social Links</button></li>
+        <li class="menu-item" data-tab="academics"><button><i class="fa-solid fa-graduation-cap"></i> Academics</button></li>
+        <li class="menu-item" data-tab="projects"><button><i class="fa-solid fa-diagram-project"></i> Projects</button></li>
+        <li class="menu-item" data-tab="skills"><button><i class="fa-solid fa-brain"></i> Skills & Certs</button></li>
+        <li class="menu-item" data-tab="achievements"><button><i class="fa-solid fa-trophy"></i> Achievements</button></li>
+        <li class="menu-item" data-tab="blogs"><button><i class="fa-solid fa-pen-nib"></i> Blog Posts</button></li>
+        <li class="menu-item" data-tab="messages"><button><i class="fa-solid fa-inbox"></i> Messages <span id="msg-badge" style="background-color: var(--danger); font-size:0.75rem; padding: 2px 6px; border-radius: 10px; display: none;">0</span></button></li>
+      </ul>
+      <button class="btn-logout" id="btn-dashboard-logout">
+        Log Out <i class="fa-solid fa-power-off"></i>
+      </button>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main>
+      <div class="main-header">
+        <h1 id="dashboard-tab-title">Profile Settings</h1>
+        <a href="/" target="_blank" class="btn-view-site">View Live Portfolio <i class="fa-solid fa-square-up-right"></i></a>
+      </div>
+
+      <!-- Alert indicators -->
+      <div class="alert alert-success" id="alert-banner-success">Changes saved successfully!</div>
+      <div class="alert alert-danger" id="alert-banner-danger">An error occurred while saving.</div>
+
+      <!-- TABS CONTENTS -->
+
+      <!-- Tab 1: Profile & CV -->
+      <div class="tab-content active" id="tab-profile">
+        <div class="form-panel">
+          <h3>Core Details</h3>
+          <form id="form-profile-details">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="profile-name">Full Name</label>
+                <input type="text" id="profile-name" class="form-control" placeholder="Alex Mercer" required>
+              </div>
+              <div class="form-group">
+                <label for="profile-tagline">Tagline</label>
+                <input type="text" id="profile-tagline" class="form-control" placeholder="B.Tech Computer Science Student" required>
+              </div>
+              <div class="form-group span-2">
+                <label for="profile-about">About Me (Bio)</label>
+                <textarea id="profile-about" class="form-control" placeholder="Detailed professional bio..." required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Profile Picture</label>
+                <div class="file-input-wrapper">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <p class="file-input-name" id="profile-pic-name">Click or drag image file (.png, .jpg)</p>
+                  <input type="file" id="profile-pic-file" accept="image/*">
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn-submit" style="margin-top: 15px;">Update Profile Details</button>
+          </form>
+        </div>
+
+        <div class="form-panel">
+          <h3>Resume Management</h3>
+          <form id="form-profile-resume">
+            <div class="form-group">
+              <label>Resume PDF File</label>
+              <div class="file-input-wrapper">
+                <i class="fa-solid fa-file-pdf"></i>
+                <p class="file-input-name" id="resume-file-name">Select your new Resume.pdf</p>
+                <input type="file" id="resume-file" accept="application/pdf" required>
+              </div>
+            </div>
+            <button type="submit" class="btn-submit">Upload Resume PDF</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tab 1.5: Social Links (NEW) -->
+      <div class="tab-content" id="tab-socials">
+        <div class="form-panel">
+          <h3>Social Profiles</h3>
+          <form id="form-social-links">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="social-github"><i class="fa-brands fa-github"></i> GitHub Profile URL</label>
+                <input type="url" id="social-github" class="form-control" placeholder="https://github.com/username">
+              </div>
+              <div class="form-group">
+                <label for="social-linkedin"><i class="fa-brands fa-linkedin-in"></i> LinkedIn Profile URL</label>
+                <input type="url" id="social-linkedin" class="form-control" placeholder="https://linkedin.com/in/username">
+              </div>
+              <div class="form-group">
+                <label for="social-leetcode"><i class="fa-solid fa-terminal"></i> LeetCode Profile URL</label>
+                <input type="url" id="social-leetcode" class="form-control" placeholder="https://leetcode.com/username">
+              </div>
+              <div class="form-group">
+                <label for="social-twitter"><i class="fa-brands fa-twitter"></i> Twitter / X Profile URL</label>
+                <input type="url" id="social-twitter" class="form-control" placeholder="https://twitter.com/username">
+              </div>
+              <div class="form-group span-2">
+                <label for="social-email"><i class="fa-solid fa-envelope"></i> Professional Contact Email</label>
+                <input type="email" id="social-email" class="form-control" placeholder="alex.mercer@example.com">
+              </div>
+            </div>
+            <button type="submit" class="btn-submit" style="margin-top: 15px;">Update Social Connections</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tab 1.8: Academics Tracker (NEW) -->
+      <div class="tab-content" id="tab-academics">
+        <div class="form-panel">
+          <h3>Update Semester Grades</h3>
+          <form id="form-semester-update">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="sem-number">Select Semester</label>
+                <select id="sem-number" class="form-control" required>
+                  <option value="1">Semester 1</option>
+                  <option value="2">Semester 2</option>
+                  <option value="3">Semester 3</option>
+                  <option value="4">Semester 4</option>
+                  <option value="5">Semester 5</option>
+                  <option value="6">Semester 6</option>
+                  <option value="7">Semester 7</option>
+                  <option value="8">Semester 8</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="sem-sgpa">Semester SGPA</label>
+                <input type="number" id="sem-sgpa" class="form-control" min="0" max="10" step="0.01" placeholder="E.g., 9.20" required>
+              </div>
+              <div class="form-group">
+                <label for="sem-cgpa">Cumulative CGPA (at this point)</label>
+                <input type="number" id="sem-cgpa" class="form-control" min="0" max="10" step="0.01" placeholder="E.g., 8.90" required>
+              </div>
+              <div class="form-group span-2">
+                <label for="sem-courses">Key Coursework / Focus Area (Comma separated)</label>
+                <textarea id="sem-courses" class="form-control" placeholder="Calculus, Data Structures, Database Architecture..."></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn-submit">Save Semester Grades</button>
+          </form>
+        </div>
+
+        <div class="form-panel">
+          <h3>Semester Records Overview</h3>
+          <div class="manage-list" id="academics-manage-container" style="gap: 10px;">
+            <!-- Dynamically Loaded Semester Rows -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Projects -->
+      <div class="tab-content" id="tab-projects">
+        <div class="form-panel">
+          <h3>Add New Project</h3>
+          <form id="form-project-add">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="proj-title">Project Title</label>
+                <input type="text" id="proj-title" class="form-control" placeholder="E.g., Smart Irrigation Bot" required>
+              </div>
+              <div class="form-group">
+                <label for="proj-link">Link / GitHub URL</label>
+                <input type="url" id="proj-link" class="form-control" placeholder="https://github.com/username/project">
+              </div>
+              <div class="form-group span-2">
+                <label for="proj-desc">Project Description</label>
+                <textarea id="proj-desc" class="form-control" placeholder="Explain the stack, problem, and your contribution..." required></textarea>
+              </div>
+              <div class="form-group">
+                <label>Project Photo / Thumbnail</label>
+                <div class="file-input-wrapper">
+                  <i class="fa-solid fa-image"></i>
+                  <p class="file-input-name" id="proj-img-name">Upload project visual preview</p>
+                  <input type="file" id="proj-img" accept="image/*">
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn-submit" style="margin-top: 15px;">Publish Project <i class="fa-solid fa-circle-plus"></i></button>
+          </form>
+        </div>
+
+        <div class="form-panel">
+          <h3>Current Projects List</h3>
+          <div class="manage-list" id="projects-manage-container">
+            <!-- Dynamically Loaded Admin Rows -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Skills & Certs -->
+      <div class="tab-content" id="tab-skills">
+        <div class="form-grid">
+          <div>
+            <div class="form-panel">
+              <h3>Add Skill</h3>
+              <form id="form-skill-add">
+                <div class="form-group">
+                  <label for="skill-name">Skill Name</label>
+                  <input type="text" id="skill-name" class="form-control" placeholder="E.g., Python, Docker" required>
+                </div>
+                <div class="form-group">
+                  <label for="skill-cat">Category</label>
+                  <select id="skill-cat" class="form-control" required>
+                    <option value="Languages & Frameworks">Languages & Frameworks</option>
+                    <option value="Database & Cloud">Database & Cloud</option>
+                    <option value="Tools & DevOps">Tools & DevOps</option>
+                    <option value="General & Soft Skills">General & Soft Skills</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="skill-prof">Proficiency Level (10-100%)</label>
+                  <input type="number" id="skill-prof" class="form-control" min="10" max="100" value="80" required>
+                </div>
+                <button type="submit" class="btn-submit">Add Skill Row</button>
+              </form>
+            </div>
+            
+            <div class="form-panel">
+              <h3>Current Skills</h3>
+              <div class="manage-list" id="skills-manage-container">
+                <!-- Dynamically Loaded Rows -->
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="form-panel">
+              <h3>Add Certification</h3>
+              <form id="form-cert-add">
+                <div class="form-group">
+                  <label for="cert-title">Certificate Name</label>
+                  <input type="text" id="cert-title" class="form-control" placeholder="E.g., AWS Architect" required>
+                </div>
+                <div class="form-group">
+                  <label for="cert-issuer">Issuer / Vendor</label>
+                  <input type="text" id="cert-issuer" class="form-control" placeholder="E.g., AWS, Google, Coursera" required>
+                </div>
+                <div class="form-group">
+                  <label for="cert-date">Date Issued</label>
+                  <input type="text" id="cert-date" class="form-control" placeholder="E.g., Jan 2026" required>
+                </div>
+                <div class="form-group">
+                  <label for="cert-link">Validation URL</label>
+                  <input type="url" id="cert-link" class="form-control" placeholder="Credential link">
+                </div>
+                <button type="submit" class="btn-submit">Add Certificate</button>
+              </form>
+            </div>
+
+            <div class="form-panel">
+              <h3>Current Certifications</h3>
+              <div class="manage-list" id="certs-manage-container">
+                <!-- Dynamically Loaded Rows -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Achievements -->
+      <div class="tab-content" id="tab-achievements">
+        <div class="form-panel">
+          <h3>Add Achievement</h3>
+          <form id="form-ach-add">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="ach-title">Title / Milestone</label>
+                <input type="text" id="ach-title" class="form-control" placeholder="E.g., 1st Prize SIH Hackathon" required>
+              </div>
+              <div class="form-group">
+                <label for="ach-date">Time / Date</label>
+                <input type="text" id="ach-date" class="form-control" placeholder="E.g., December 2025" required>
+              </div>
+              <div class="form-group span-2">
+                <label for="ach-desc">Description / details</label>
+                <textarea id="ach-desc" class="form-control" placeholder="Details about this milestone..." required></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn-submit">Publish Achievement</button>
+          </form>
+        </div>
+
+        <div class="form-panel">
+          <h3>Current Achievements List</h3>
+          <div class="manage-list" id="ach-manage-container">
+            <!-- Dynamically Loaded Rows -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Blogs -->
+      <div class="tab-content" id="tab-blogs">
+        <div class="form-panel">
+          <h3>Publish New Article</h3>
+          <form id="form-blog-add">
+            <div class="form-grid full">
+              <div class="form-group">
+                <label for="blog-title">Article Title</label>
+                <input type="text" id="blog-title" class="form-control" placeholder="E.g., A Beginner Guide to REST APIs" required>
+              </div>
+              <div class="form-group">
+                <label for="blog-excerpt">Brief Excerpt / Summary</label>
+                <input type="text" id="blog-excerpt" class="form-control" placeholder="One sentence summary of the post..." required>
+              </div>
+              <div class="form-group">
+                <label for="blog-content">Full Markdown / Text Content</label>
+                <textarea id="blog-content" class="form-control" style="min-height: 250px;" placeholder="Write your full article body here..." required></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn-submit">Publish Blog Post <i class="fa-solid fa-upload"></i></button>
+          </form>
+        </div>
+
+        <div class="form-panel">
+          <h3>Published Articles List</h3>
+          <div class="manage-list" id="blogs-manage-container">
+            <!-- Dynamically Loaded Rows -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 6: Messages -->
+      <div class="tab-content" id="tab-messages">
+        <div class="form-panel">
+          <h3>Contact Form Submissions</h3>
+          <div class="manage-list" id="messages-container">
+            <!-- Message Cards -->
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- EDIT DYNAMIC OVERLAY MODAL (NEW) -->
+  <div class="modal" id="edit-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">
+          <h2 id="edit-modal-title">Edit Resource</h2>
+        </div>
+        <button class="modal-close" id="edit-modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-edit-item" enctype="multipart/form-data">
+          <!-- Dynamically Injected Edit Fields -->
+          <div id="edit-fields-container"></div>
+          
+          <div style="margin-top: 25px; display: flex; gap: 15px; justify-content: flex-end;">
+            <button type="button" class="btn-delete" id="btn-edit-cancel" style="padding: 10px 20px;">Cancel</button>
+            <button type="submit" class="btn-submit" style="padding: 10px 24px;">Save Changes <i class="fa-solid fa-circle-check"></i></button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Control Panel JavaScript -->
+  <script>
+    let isAuthed = false;
+    let portfolioData = {};
+    let activeEditCategory = '';
+    let activeEditId = '';
+
+    // Page Load Checks
+    document.addEventListener('DOMContentLoaded', async () => {
+      await checkAuth();
+      setupTabs();
+      setupFileInputs();
+      setupForms();
+      setupEditModal();
+    });
+
+    // Check backend session auth
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/admin/check');
+        const data = await res.json();
+        
+        if (data.authenticated) {
+          isAuthed = true;
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('dashboard-screen').style.display = 'grid';
+          await loadDashboardData();
+        } else {
+          isAuthed = false;
+          document.getElementById('login-screen').style.display = 'flex';
+          document.getElementById('dashboard-screen').style.display = 'none';
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+      }
+    }
+
+    // Login Form Submission
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('admin-password').value;
+      const errorBanner = document.getElementById('login-error-banner');
+      errorBanner.style.display = 'none';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          document.getElementById('admin-password').value = '';
+          await checkAuth();
+        } else {
+          errorBanner.innerText = data.error || 'Login Failed';
+          errorBanner.style.display = 'block';
+        }
+      } catch (err) {
+        errorBanner.innerText = 'Network error. Please try again.';
+        errorBanner.style.display = 'block';
+      }
+    });
+
+    // Logout Button
+    document.getElementById('btn-dashboard-logout').addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/auth/logout', { method: 'POST' });
+        if (res.ok) {
+          await checkAuth();
+        }
+      } catch (err) {
+        console.error('Logout error:', err);
+      }
+    });
+
+    // TAB SWITCHER NAVIGATION
+    function setupTabs() {
+      const menuItems = document.querySelectorAll('.menu-list .menu-item');
+      const tabContents = document.querySelectorAll('.tab-content');
+      const tabTitle = document.getElementById('dashboard-tab-title');
+
+      menuItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const tabName = item.getAttribute('data-tab');
+          
+          menuItems.forEach(mi => mi.classList.remove('active'));
+          item.classList.add('active');
+
+          tabContents.forEach(tc => tc.classList.remove('active'));
+          document.getElementById(`tab-${tabName}`).classList.add('active');
+
+          tabTitle.innerText = item.innerText.trim();
+        });
+      });
+    }
+
+    // File input label display handler
+    function setupFileInputs() {
+      const inputs = [
+        { fileId: 'profile-pic-file', labelId: 'profile-pic-name', prefix: 'Selected Pic: ' },
+        { fileId: 'resume-file', labelId: 'resume-file-name', prefix: 'Selected PDF: ' },
+        { fileId: 'proj-img', labelId: 'proj-img-name', prefix: 'Selected Image: ' }
+      ];
+
+      inputs.forEach(el => {
+        const fileInput = document.getElementById(el.fileId);
+        const label = document.getElementById(el.labelId);
+        if (fileInput && label) {
+          fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+              label.innerText = el.prefix + fileInput.files[0].name;
+            }
+          });
+        }
+      });
+    }
+
+    // Load Database Data to dashboard
+    async function loadDashboardData() {
+      try {
+        const res = await fetch('/api/portfolio');
+        if (!res.ok) throw new Error();
+        portfolioData = await res.json();
+
+        populateProfileForm(portfolioData.profile);
+        populateSocialsForm(portfolioData.socials);
+        populateAcademicsList(portfolioData.academics);
+        populateProjectsList(portfolioData.projects);
+        populateSkillsList(portfolioData.skills);
+        populateCertificationsList(portfolioData.certificates);
+        populateAchievementsList(portfolioData.achievements);
+        populateBlogsList(portfolioData.blogs);
+        
+        await loadMessagesInbox();
+      } catch (err) {
+        showFeedback(false, 'Failed to sync database data.');
+      }
+    }
+
+    // Feedback alert handler
+    function showFeedback(isSuccess, message) {
+      const successEl = document.getElementById('alert-banner-success');
+      const dangerEl = document.getElementById('alert-banner-danger');
+      
+      successEl.style.display = 'none';
+      dangerEl.style.display = 'none';
+
+      if (isSuccess) {
+        successEl.innerText = message || 'Changes saved successfully!';
+        successEl.style.display = 'block';
+        setTimeout(() => successEl.style.display = 'none', 4000);
+      } else {
+        dangerEl.innerText = message || 'An error occurred.';
+        dangerEl.style.display = 'block';
+        setTimeout(() => dangerEl.style.display = 'none', 4500);
+      }
+    }
+
+    // Form Populate Helpers
+    function populateProfileForm(profile) {
+      if (!profile) return;
+      document.getElementById('profile-name').value = profile.name || '';
+      document.getElementById('profile-tagline').value = profile.tagline || '';
+      document.getElementById('profile-about').value = profile.about || '';
+    }
+
+    function populateSocialsForm(socials) {
+      if (!socials) return;
+      document.getElementById('social-github').value = socials.github || '';
+      document.getElementById('social-linkedin').value = socials.linkedin || '';
+      document.getElementById('social-leetcode').value = socials.leetcode || '';
+      document.getElementById('social-twitter').value = socials.twitter || '';
+      document.getElementById('social-email').value = socials.email || '';
+    }
+
+    // Populate Tab 1.8 Academics rows
+    function populateAcademicsList(academics) {
+      const container = document.getElementById('academics-manage-container');
+      container.innerHTML = '';
+      if (!academics || academics.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No grades found.</p>';
+        return;
+      }
+
+      academics.forEach(sem => {
+        const row = document.createElement('div');
+        row.className = 'sem-item-row';
+        
+        const courses = sem.courses || 'No subjects logged';
+        row.innerHTML = `
+          <span class="label">Semester ${sem.semester}</span>
+          <span>SGPA: <strong class="gpa" style="color:var(--primary);">${sem.sgpa > 0 ? sem.sgpa.toFixed(2) : 'N/A'}</strong></span>
+          <span>CGPA: <strong class="gpa" style="color:#10b981;">${sem.cgpa > 0 ? sem.cgpa.toFixed(2) : 'N/A'}</strong></span>
+          <span class="courses">${courses}</span>
+          <button class="btn-action-edit" onclick="loadSemesterGradesForm('${sem.semester}')"><i class="fa-solid fa-edit"></i> Edit</button>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function loadSemesterGradesForm(semNum) {
+      const sem = portfolioData.academics.find(a => a.semester === parseInt(semNum, 10));
+      if (!sem) return;
+
+      document.getElementById('sem-number').value = sem.semester;
+      document.getElementById('sem-sgpa').value = sem.sgpa > 0 ? sem.sgpa : '';
+      document.getElementById('sem-cgpa').value = sem.cgpa > 0 ? sem.cgpa : '';
+      document.getElementById('sem-courses').value = sem.courses || '';
+      
+      // Focus on forms input
+      document.getElementById('sem-sgpa').focus();
+    }
+
+    // Populate Tab 2 Projects
+    function populateProjectsList(projects) {
+      const container = document.getElementById('projects-manage-container');
+      container.innerHTML = '';
+      if (!projects || projects.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No projects uploaded yet.</p>';
+        return;
+      }
+
+      projects.forEach(p => {
+        const thumbnail = p.image 
+          ? `<img class="proj-thumbnail" src="${p.image}" alt="Thumbnail">`
+          : `<div class="proj-thumbnail" style="display:flex;align-items:center;justify-content:center;color:var(--primary);"><i class="fa-solid fa-code"></i></div>`;
+
+        const row = document.createElement('div');
+        row.className = 'manage-item';
+        row.innerHTML = `
+          <div class="proj-item-with-img">
+            ${thumbnail}
+            <div class="manage-info">
+              <h4>${p.title}</h4>
+              <p>${p.description.substring(0, 80)}...</p>
+            </div>
+          </div>
+          <div class="action-group">
+            <button class="btn-action-edit" onclick="openEditModal('projects', '${p.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button class="btn-delete" onclick="deleteItem('projects', '${p.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Populate Tab 3 Skills
+    function populateSkillsList(skills) {
+      const container = document.getElementById('skills-manage-container');
+      container.innerHTML = '';
+      if (!skills || skills.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No skills added yet.</p>';
+        return;
+      }
+      skills.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'manage-item';
+        row.innerHTML = `
+          <div class="manage-info">
+            <h4>${s.name} (${s.proficiency}%)</h4>
+            <p>Category: ${s.category}</p>
+          </div>
+          <div class="action-group">
+            <button class="btn-action-edit" onclick="openEditModal('skills', '${s.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button class="btn-delete" onclick="deleteItem('skills', '${s.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Populate Tab 3 Certificates
+    function populateCertificationsList(certs) {
+      const container = document.getElementById('certs-manage-container');
+      container.innerHTML = '';
+      if (!certs || certs.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No certificates added yet.</p>';
+        return;
+      }
+      certs.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'manage-item';
+        row.innerHTML = `
+          <div class="manage-info">
+            <h4>${c.title}</h4>
+            <p>${c.issuer} - Issued: ${c.date}</p>
+          </div>
+          <div class="action-group">
+            <button class="btn-action-edit" onclick="openEditModal('certificates', '${c.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button class="btn-delete" onclick="deleteItem('certificates', '${c.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Populate Tab 4 Achievements
+    function populateAchievementsList(ach) {
+      const container = document.getElementById('ach-manage-container');
+      container.innerHTML = '';
+      if (!ach || ach.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No achievements uploaded yet.</p>';
+        return;
+      }
+      ach.forEach(a => {
+        const row = document.createElement('div');
+        row.className = 'manage-item';
+        row.innerHTML = `
+          <div class="manage-info">
+            <h4>${a.title}</h4>
+            <p>Milestone Date: ${a.date} | ${a.description.substring(0, 80)}...</p>
+          </div>
+          <div class="action-group">
+            <button class="btn-action-edit" onclick="openEditModal('achievements', '${a.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button class="btn-delete" onclick="deleteItem('achievements', '${a.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Populate Tab 5 Blogs
+    function populateBlogsList(blogs) {
+      const container = document.getElementById('blogs-manage-container');
+      container.innerHTML = '';
+      if (!blogs || blogs.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No blog posts published yet.</p>';
+        return;
+      }
+      blogs.forEach(b => {
+        const row = document.createElement('div');
+        row.className = 'manage-item';
+        row.innerHTML = `
+          <div class="manage-info">
+            <h4>${b.title}</h4>
+            <p>Published: ${b.date} | ${b.excerpt}</p>
+          </div>
+          <div class="action-group">
+            <button class="btn-action-edit" onclick="openEditModal('blogs', '${b.id}')"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+            <button class="btn-delete" onclick="deleteItem('blogs', '${b.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Inbox Mail Fetching
+    async function loadMessagesInbox() {
+      const container = document.getElementById('messages-container');
+      const badge = document.getElementById('msg-badge');
+      container.innerHTML = '';
+
+      try {
+        const res = await fetch('/api/admin/messages');
+        if (!res.ok) throw new Error();
+        const messages = await res.json();
+
+        if (messages.length > 0) {
+          badge.innerText = messages.length;
+          badge.style.display = 'inline-block';
+        } else {
+          badge.style.display = 'none';
+        }
+
+        if (messages.length === 0) {
+          container.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Your inbox is empty. Contact submissions will appear here.</p>';
+          return;
+        }
+
+        messages.reverse().forEach(m => {
+          const dateStr = new Date(m.date).toLocaleString();
+          const card = document.createElement('div');
+          card.className = 'message-card';
+          card.innerHTML = `
+            <div class="message-meta">
+              <span>From: ${m.name} (<a href="mailto:${m.email}" style="color:var(--primary);text-decoration:none;">${m.email}</a>)</span>
+              <span class="date">${dateStr}</span>
+            </div>
+            <h4>Subject: ${m.subject}</h4>
+            <p class="body">${m.message}</p>
+            <div class="message-actions">
+              <button class="btn-delete" onclick="deleteInboxMessage('${m.id}')"><i class="fa-solid fa-trash"></i> Delete Message</button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        container.innerHTML = '<p style="color:var(--danger); font-size:0.9rem;">Failed to fetch inbox messages.</p>';
+      }
+    }
+
+    // Delete single items CRUD (REST Delete)
+    async function deleteItem(category, id) {
+      if (!confirm('Are you sure you want to delete this entry?')) return;
+
+      try {
+        const res = await fetch(`/api/admin/${category}/${id}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          showFeedback(true, data.message || 'Deleted successfully!');
+          await loadDashboardData();
+        } else {
+          showFeedback(false, data.error || 'Failed to delete entry');
+        }
+      } catch (err) {
+        showFeedback(false, 'Network error.');
+      }
+    }
+
+    async function deleteInboxMessage(id) {
+      if (!confirm('Are you sure you want to delete this message?')) return;
+
+      try {
+        const res = await fetch('/api/admin/messages/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          showFeedback(true, 'Message deleted successfully!');
+          await loadMessagesInbox();
+        } else {
+          showFeedback(false, data.error || 'Failed to delete message');
+        }
+      } catch (err) {
+        showFeedback(false, 'Network error.');
+      }
+    }
+
+    // Form inputs submissions handlers
+    function setupForms() {
+      // 1. Profile Core
+      document.getElementById('form-profile-details').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('name', document.getElementById('profile-name').value);
+        formData.append('tagline', document.getElementById('profile-tagline').value);
+        formData.append('about', document.getElementById('profile-about').value);
+        
+        const fileInput = document.getElementById('profile-pic-file');
+        if (fileInput.files.length > 0) {
+          formData.append('profileImage', fileInput.files[0]);
+        }
+
+        try {
+          const res = await fetch('/api/admin/profile', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await res.json();
+          if (res.ok) {
+            showFeedback(true, 'Profile details updated!');
+            document.getElementById('profile-pic-file').value = '';
+            await loadDashboardData();
+          } else {
+            showFeedback(false, result.error || 'Profile update failed.');
+          }
+        } catch (err) {
+          showFeedback(false, 'Network error.');
+        }
+      });
+
+      // 2. Resume PDF
+      document.getElementById('form-profile-resume').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById('resume-file');
+        if (fileInput.files.length === 0) return;
+
+        const formData = new FormData();
+        formData.append('resume', fileInput.files[0]);
+
+        try {
+          const res = await fetch('/api/admin/resume', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await res.json();
+          if (res.ok) {
+            showFeedback(true, 'Resume PDF updated successfully!');
+            document.getElementById('resume-file').value = '';
+            document.getElementById('resume-file-name').innerText = 'Select your new Resume.pdf';
+            await loadDashboardData();
+          } else {
+            showFeedback(false, result.error || 'Resume upload failed.');
+          }
+        } catch (err) {
+          showFeedback(false, 'Network error.');
+        }
+      });
+
+      // 3. Social links update form (PUT)
+      document.getElementById('form-social-links').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const github = document.getElementById('social-github').value;
+        const linkedin = document.getElementById('social-linkedin').value;
+        const leetcode = document.getElementById('social-leetcode').value;
+        const twitter = document.getElementById('social-twitter').value;
+        const email = document.getElementById('social-email').value;
+
+        try {
+          const res = await fetch('/api/admin/socials', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ github, linkedin, leetcode, twitter, email })
+          });
+          const result = await res.json();
+          if (res.ok) {
+            showFeedback(true, 'Social profiles connection saved!');
+            await loadDashboardData();
+          } else {
+            showFeedback(false, result.error || 'Failed to update socials.');
+          }
+        } catch (err) {
+          showFeedback(false, 'Network error.');
+        }
+      });
+
+      // 4. Academics Semester Update Form (PUT)
+      document.getElementById('form-semester-update').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const sem = document.getElementById('sem-number').value;
+        const sgpa = document.getElementById('sem-sgpa').value;
+        const cgpa = document.getElementById('sem-cgpa').value;
+        const courses = document.getElementById('sem-courses').value;
+
+        try {
+          const res = await fetch(`/api/admin/academics/${sem}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sgpa, cgpa, courses })
+          });
+          const result = await res.json();
+          if (res.ok) {
+            showFeedback(true, `Semester ${sem} grades saved successfully!`);
+            document.getElementById('form-semester-update').reset();
+            await loadDashboardData();
+          } else {
+            showFeedback(false, result.error || 'Failed to save grades.');
+          }
+        } catch (err) {
+          showFeedback(false, 'Network error.');
+        }
+      });
+
+      // 5. Project Add
+      document.getElementById('form-project-add').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('title', document.getElementById('proj-title').value);
+        formData.append('link', document.getElementById('proj-link').value);
+        formData.append('description', document.getElementById('proj-desc').value);
+
+        const imgInput = document.getElementById('proj-img');
+        if (imgInput.files.length > 0) {
+          formData.append('projectImage', imgInput.files[0]);
+        }
+
+        try {
+          const res = await fetch('/api/admin/projects', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await res.json();
+          if (res.ok) {
+            showFeedback(true, 'Project published successfully!');
+            document.getElementById('form-project-add').reset();
+            document.getElementById('proj-img-name').innerText = 'Upload project visual preview';
+            await loadDashboardData();
+          } else {
+            showFeedback(false, result.error || 'Failed to publish project.');
+          }
+        } catch (err) {
+          showFeedback(false, 'Network error.');
+        }
+      });
+
+      // 6. Skill Add
+      document.getElementById('form-skill-add').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('skill-name').value;
+        const category = document.getElementById('skill-cat').value;
+        const proficiency = document.getElementById('skill-prof').value;
+
+        try {
+          const res = await fetch('/api/admin/skills', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, category, proficiency })
+          });
+          const result = await res.json();
+          if (res.ok) {
+            showFeedback(true, 'Skill entry added!');
+            document.getElementById('skill-name').value = '';
+            document.getElementById('skill-prof').value = '80';
+            await loadDashboardData();
+          } else {
+            showFeedback(false, result.error || 'Failed to add skill.');
+          }
+        } catch (err) {
+          showFeedback(false, 'Network error.');
+        }
+      });
+
+      // 7. Certification Add
+      document.getElementById('form-cert-add').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('cert-title').value;
+        const issuer = document.getElementById('cert-issuer').value;
+        const date = document.getElementById('cert-date').value;
+        const link = document.getElementById('cert-link').value;
+
+        try {
+          const res = await fetch('/api/admin/certificates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, issuer, date, link })
+          });
+          const result = await res.json();
+          if (res.ok) {
+            showFeedback(true, 'Certification entry added!');
+            document.getElementById('form-cert-add').reset();
+            await loadDashboardData();
+          } else {
+            showFeedback(false, result.error || 'Failed to add certification.');
+          }
+        } catch (err) {
+          showFeedback(false, 'Network error.');
+        }
+      });
+
+      // 8. Achievement Add
+      document.getElementById('form-ach-add').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('ach-title').value;
+        const date = document.getElementById('ach-date').value;
+        const description = document.getElementById('ach-desc').value;
+
+        try {
+          const res = await fetch('/api/admin/achievements', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, date, description })
+          });
+          const result = await res.json();
+          if (res.ok) {
+            showFeedback(true, 'Achievement published!');
+            document.getElementById('form-ach-add').reset();
+            await loadDashboardData();
+          } else {
+            showFeedback(false, result.error || 'Failed to add achievement.');
+          }
+        } catch (err) {
+          showFeedback(false, 'Network error.');
+        }
+      });
+
+      // 9. Blog Add
+      document.getElementById('form-blog-add').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('blog-title').value;
+        const excerpt = document.getElementById('blog-excerpt').value;
+        const content = document.getElementById('blog-content').value;
+
+        try {
+          const res = await fetch('/api/admin/blogs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, excerpt, content })
+          });
+          const result = await res.json();
+          if (res.ok) {
+            showFeedback(true, 'Blog article published successfully!');
+            document.getElementById('form-blog-add').reset();
+            await loadDashboardData();
+          } else {
+            showFeedback(false, result.error || 'Failed to publish article.');
+          }
+        } catch (err) {
+          showFeedback(false, 'Network error.');
+        }
+      });
+    }
+
+    // SETUP RESOURCE EDITING OVERLAY MODAL (PUT)
+    function setupEditModal() {
+      const modal = document.getElementById('edit-modal');
+      const closeBtn = document.getElementById('edit-modal-close-btn');
+      const cancelBtn = document.getElementById('btn-edit-cancel');
+      const editForm = document.getElementById('form-edit-item');
+
+      const closeModal = () => {
+        modal.style.display = 'none';
+        activeEditCategory = '';
+        activeEditId = '';
+      };
+
+      closeBtn.onclick = closeModal;
+      cancelBtn.onclick = closeModal;
+
+      window.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+
+      editForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!activeEditCategory || !activeEditId) return;
+
+        let res;
+        
+        // Projects require multi-part form upload because they can update images
+        if (activeEditCategory === 'projects') {
+          const formData = new FormData();
+          formData.append('title', document.getElementById('edit-proj-title').value);
+          formData.append('link', document.getElementById('edit-proj-link').value);
+          formData.append('description', document.getElementById('edit-proj-desc').value);
+          
+          const fileInput = document.getElementById('edit-proj-img');
+          if (fileInput && fileInput.files.length > 0) {
+            formData.append('projectImage', fileInput.files[0]);
+          }
+
+          res = await fetch(`/api/admin/projects/${activeEditId}`, {
+            method: 'PUT',
+            body: formData
+          });
+        } else {
+          // Standard JSON payload for others
+          const bodyData = {};
+          
+          if (activeEditCategory === 'skills') {
+            bodyData.name = document.getElementById('edit-skill-name').value;
+            bodyData.category = document.getElementById('edit-skill-cat').value;
+            bodyData.proficiency = document.getElementById('edit-skill-prof').value;
+          } else if (activeEditCategory === 'certificates') {
+            bodyData.title = document.getElementById('edit-cert-title').value;
+            bodyData.issuer = document.getElementById('edit-cert-issuer').value;
+            bodyData.date = document.getElementById('edit-cert-date').value;
+            bodyData.link = document.getElementById('edit-cert-link').value;
+          } else if (activeEditCategory === 'achievements') {
+            bodyData.title = document.getElementById('edit-ach-title').value;
+            bodyData.date = document.getElementById('edit-ach-date').value;
+            bodyData.description = document.getElementById('edit-ach-desc').value;
+          } else if (activeEditCategory === 'blogs') {
+            bodyData.title = document.getElementById('edit-blog-title').value;
+            bodyData.excerpt = document.getElementById('edit-blog-excerpt').value;
+            bodyData.content = document.getElementById('edit-blog-content').value;
+          }
+
+          res = await fetch(`/api/admin/${activeEditCategory}/${activeEditId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyData)
+          });
+        }
+
+        const data = await res.json();
+        if (res.ok) {
+          closeModal();
+          showFeedback(true, 'Changes saved successfully!');
+          await loadDashboardData();
+        } else {
+          showFeedback(false, data.error || 'Failed to update entry.');
+        }
+      });
+    }
+
+    // Opens dynamic Modal and populates input templates
+    function openEditModal(category, id) {
+      activeEditCategory = category;
+      activeEditId = id;
+
+      const container = document.getElementById('edit-fields-container');
+      container.innerHTML = ''; // Clear
+
+      const item = portfolioData[category].find(x => x.id === id);
+      if (!item) return;
+
+      const modalTitle = document.getElementById('edit-modal-title');
+      const modal = document.getElementById('edit-modal');
+
+      if (category === 'projects') {
+        modalTitle.innerText = 'Edit Project Details';
+        container.innerHTML = `
+          <div class="form-group">
+            <label for="edit-proj-title">Project Title</label>
+            <input type="text" id="edit-proj-title" class="form-control" value="${item.title || ''}" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-proj-link">Link / GitHub URL</label>
+            <input type="url" id="edit-proj-link" class="form-control" value="${item.link || ''}">
+          </div>
+          <div class="form-group">
+            <label for="edit-proj-desc">Project Description</label>
+            <textarea id="edit-proj-desc" class="form-control" required>${item.description || ''}</textarea>
+          </div>
+          <div class="form-group">
+            <label>Replace Project Image (Optional)</label>
+            <div class="file-input-wrapper" style="padding:15px;">
+              <i class="fa-solid fa-image"></i>
+              <p class="file-input-name" id="edit-proj-img-label">Select image file to replace current one</p>
+              <input type="file" id="edit-proj-img" accept="image/*">
+            </div>
+          </div>
+        `;
+        
+        // Listen to inline file input label change
+        document.getElementById('edit-proj-img').addEventListener('change', (e) => {
+          if (e.target.files.length > 0) {
+            document.getElementById('edit-proj-img-label').innerText = 'Selected Replacement: ' + e.target.files[0].name;
+          }
+        });
+
+      } else if (category === 'skills') {
+        modalTitle.innerText = 'Edit Skill Entry';
+        container.innerHTML = `
+          <div class="form-group">
+            <label for="edit-skill-name">Skill Name</label>
+            <input type="text" id="edit-skill-name" class="form-control" value="${item.name || ''}" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-skill-cat">Category</label>
+            <select id="edit-skill-cat" class="form-control" required>
+              <option value="Languages & Frameworks" ${item.category === 'Languages & Frameworks' ? 'selected' : ''}>Languages & Frameworks</option>
+              <option value="Database & Cloud" ${item.category === 'Database & Cloud' ? 'selected' : ''}>Database & Cloud</option>
+              <option value="Tools & DevOps" ${item.category === 'Tools & DevOps' ? 'selected' : ''}>Tools & DevOps</option>
+              <option value="General & Soft Skills" ${item.category === 'General & Soft Skills' ? 'selected' : ''}>General & Soft Skills</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-skill-prof">Proficiency Level (10-100%)</label>
+            <input type="number" id="edit-skill-prof" class="form-control" min="10" max="100" value="${item.proficiency || 80}" required>
+          </div>
+        `;
+
+      } else if (category === 'certificates') {
+        modalTitle.innerText = 'Edit Certificate';
+        container.innerHTML = `
+          <div class="form-group">
+            <label for="edit-cert-title">Certificate Name</label>
+            <input type="text" id="edit-cert-title" class="form-control" value="${item.title || ''}" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-cert-issuer">Issuer / Vendor</label>
+            <input type="text" id="edit-cert-issuer" class="form-control" value="${item.issuer || ''}" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-cert-date">Date Issued</label>
+            <input type="text" id="edit-cert-date" class="form-control" value="${item.date || ''}" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-cert-link">Validation URL</label>
+            <input type="url" id="edit-cert-link" class="form-control" value="${item.link || ''}">
+          </div>
+        `;
+
+      } else if (category === 'achievements') {
+        modalTitle.innerText = 'Edit Achievement';
+        container.innerHTML = `
+          <div class="form-group">
+            <label for="edit-ach-title">Title / Milestone</label>
+            <input type="text" id="edit-ach-title" class="form-control" value="${item.title || ''}" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-ach-date">Time / Date</label>
+            <input type="text" id="edit-ach-date" class="form-control" value="${item.date || ''}" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-ach-desc">Description / details</label>
+            <textarea id="edit-ach-desc" class="form-control" required>${item.description || ''}</textarea>
+          </div>
+        `;
+
+      } else if (category === 'blogs') {
+        modalTitle.innerText = 'Edit Blog Article';
+        container.innerHTML = `
+          <div class="form-group">
+            <label for="edit-blog-title">Article Title</label>
+            <input type="text" id="edit-blog-title" class="form-control" value="${item.title || ''}" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-blog-excerpt">Brief Excerpt / Summary</label>
+            <input type="text" id="edit-blog-excerpt" class="form-control" value="${item.excerpt || ''}" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-blog-content">Full markdown / Text Content</label>
+            <textarea id="edit-blog-content" class="form-control" style="min-height: 200px;" required>${item.content || ''}</textarea>
+          </div>
+        `;
+      }
+
+      modal.style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
