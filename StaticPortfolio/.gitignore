@@ -1,0 +1,20 @@
+# Create .gitignore to exclude unnecessary files
+@"
+# AWS S3 related
+*.json
+*.txt
+*.backup
+*.old
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.log
+"@ | Out-File -FilePath ".gitignore" -Encoding UTF8
