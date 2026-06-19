@@ -415,113 +415,14 @@
 
         .action-group { display: flex; gap: 10px; }
 
-        .proj-item-with-img {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .proj-thumbnail {
-            width: 50px;
-            height: 50px;
+        .photo-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-panel);
+            border: 3px solid var(--primary);
+            margin: 10px 0;
         }
-
-        .message-card {
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-
-        .message-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: var(--primary);
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .message-meta span.date { color: var(--text-muted); font-weight: 400; }
-
-        .sem-item-row {
-            display: grid;
-            grid-template-columns: 100px 80px 80px 1fr auto;
-            gap: 15px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 18px;
-            align-items: center;
-        }
-
-        .sem-item-row span.label { font-weight: 600; }
-        .sem-item-row span.gpa { font-family: var(--font-display); font-weight: 600; }
-        .sem-item-row span.courses {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(7, 10, 17, 0.85);
-            backdrop-filter: blur(8px);
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            width: 100%;
-            max-width: 700px;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            animation: modalOpen 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes modalOpen {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
-            padding: 25px 30px 15px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .modal-close:hover { color: var(--text-main); }
-
-        .modal-body { padding: 25px 30px 30px; }
 
         @media (max-width: 768px) {
             #dashboard-screen { grid-template-columns: 1fr; }
@@ -538,8 +439,6 @@
             main { padding: 20px; }
             .form-grid { grid-template-columns: 1fr; }
             .form-group.span-2 { grid-column: span 1; }
-            .sem-item-row { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .sem-item-row span.courses { grid-column: span 2; }
         }
     </style>
 </head>
@@ -555,7 +454,7 @@
             <input type="password" id="admin-password" placeholder="Enter password" required>
             <button type="submit">Log In <i class="fa-solid fa-right-to-bracket"></i></button>
         </form>
-        <p style="color:var(--text-muted);font-size:0.8rem;margin-top:15px;">Password: admin123 (from server.js)</p>
+        <p style="color:var(--text-muted);font-size:0.8rem;margin-top:15px;">Password: admin123</p>
     </div>
 </div>
 
@@ -605,6 +504,28 @@
                             <label for="profile-about">About Me</label>
                             <textarea id="profile-about" class="form-control" placeholder="Detailed professional bio..." required></textarea>
                         </div>
+                        <!-- ====== PROFILE PHOTO SECTION ====== -->
+                        <div class="form-group span-2">
+                            <label>Profile Photo</label>
+                            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+                                <div>
+                                    <img id="profile-photo-preview" class="photo-preview" src="" alt="Profile Photo" style="display:none;">
+                                    <div id="profile-photo-placeholder" style="width:100px;height:100px;border-radius:50%;background:#070a11;border:2px dashed var(--border-color);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:2rem;">
+                                        <i class="fa-solid fa-user"></i>
+                                    </div>
+                                </div>
+                                <div style="flex:1;">
+                                    <input type="file" id="profile-photo-file" accept="image/*" style="width:100%;padding:10px;background:var(--bg-input);border:1px solid var(--border-color);color:white;border-radius:8px;cursor:pointer;">
+                                    <p style="color:var(--text-muted);font-size:0.8rem;margin-top:5px;">
+                                        <i class="fa-solid fa-info-circle"></i> Upload a photo (JPG, PNG, GIF) - Max 5MB
+                                    </p>
+                                    <button type="button" class="btn-submit" onclick="removePhoto()" style="margin-top:10px;background:var(--danger);">
+                                        <i class="fa-solid fa-trash"></i> Remove Photo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ====== END PROFILE PHOTO SECTION ====== -->
                     </div>
                     <button type="submit" class="btn-submit">Update Profile <i class="fa-solid fa-save"></i></button>
                 </form>
@@ -826,7 +747,7 @@
         } else {
             // Initialize empty data structure
             portfolioData = {
-                profile: { name: 'Your Name', tagline: 'B.Tech Student', about: '' },
+                profile: { name: 'Your Name', tagline: 'B.Tech Student', about: '', photo: '' },
                 socials: { github: '', linkedin: '', leetcode: '', email: '' },
                 projects: [],
                 skills: [],
@@ -854,6 +775,16 @@
         document.getElementById('profile-name').value = profile.name || '';
         document.getElementById('profile-tagline').value = profile.tagline || '';
         document.getElementById('profile-about').value = profile.about || '';
+        
+        // Show profile photo
+        if (profile.photo) {
+            document.getElementById('profile-photo-preview').src = profile.photo;
+            document.getElementById('profile-photo-preview').style.display = 'block';
+            document.getElementById('profile-photo-placeholder').style.display = 'none';
+        } else {
+            document.getElementById('profile-photo-preview').style.display = 'none';
+            document.getElementById('profile-photo-placeholder').style.display = 'flex';
+        }
     }
 
     function populateSocialsForm(socials) {
@@ -1103,6 +1034,58 @@
         loadDashboardData();
         document.getElementById('edit-modal').style.display = 'none';
         showFeedback(true, 'Updated successfully!');
+    });
+
+    // --- PROFILE PHOTO FUNCTIONS ---
+    function removePhoto() {
+        portfolioData.profile.photo = '';
+        saveData();
+        document.getElementById('profile-photo-preview').style.display = 'none';
+        document.getElementById('profile-photo-placeholder').style.display = 'flex';
+        document.getElementById('profile-photo-file').value = '';
+        showFeedback(true, 'Photo removed!');
+    }
+
+    // --- PROFILE PHOTO UPLOAD ---
+    document.getElementById('profile-photo-file').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showFeedback(false, 'File too large! Max size is 5MB.');
+            this.value = '';
+            return;
+        }
+
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            showFeedback(false, 'Please upload an image file!');
+            this.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const photoData = e.target.result;
+            
+            // Update preview
+            document.getElementById('profile-photo-preview').src = photoData;
+            document.getElementById('profile-photo-preview').style.display = 'block';
+            document.getElementById('profile-photo-placeholder').style.display = 'none';
+
+            // Save to data
+            portfolioData.profile.photo = photoData;
+            saveData();
+            
+            showFeedback(true, 'Profile photo uploaded successfully!');
+        };
+
+        reader.onerror = function() {
+            showFeedback(false, 'Error reading file. Please try again.');
+        };
+
+        reader.readAsDataURL(file);
     });
 
     // --- FORM SUBMISSIONS ---
